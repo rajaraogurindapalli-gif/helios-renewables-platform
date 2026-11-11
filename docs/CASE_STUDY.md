@@ -87,3 +87,11 @@ The Gold Kimball star schema connects directly to Tableau Public 2026.2 to monit
 ## 7. Enterprise SDLC & Dev-Test-Prod Environment Topology
 
 To replicate industrial-grade mission-critical deployments, Helios isolates operational risks via a 3-tier promotion lifecycle, segregating state, streaming channels, and compute permissions across development, automated testing, and production.
+
+---
+
+## 8. Enterprise Architecture Alignment (TOGAF Standard)
+
+Helios adheres to the **TOGAF Standard (The Open Group Architecture Framework)**, structured across the four core architecture domains of the Architecture Development Method (ADM): Business, Data, Application, and Technology (BDAT).
+
+### BDAT Architecture Decomposition
