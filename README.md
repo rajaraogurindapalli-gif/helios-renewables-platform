@@ -7,21 +7,87 @@
 [![Tableau: Production Bound](https://img.shields.io/badge/Tableau-Operational%20Twin-E97627.svg)](https://public.tableau.com)
 [![Streamlit: Reliability Copilot](https://img.shields.io/badge/Streamlit-Copilot%20UI-FF4B4B.svg)](src/agent/app.py)
 
-Helios is an **Industry 5.0 Agentic Digital Twin** built for continuous 10MW utility-scale photovoltaic fleets (4x 2.5MW central inverters). It replaces static telemetry thresholds with a closed-loop reliability pipeline: **Physics Engine -> BigQuery Medallion Lakehouse -> PyTorch Autoencoder -> Autonomous ReAct & Industrial RAG Agent -> Predictive Horizons & CMMS Memory**.
+H# Helios: 10MW Solar Fleet Digital Twin & Autonomous Reliability Copilot
+
+An enterprise-grade renewable energy digital twin and prescriptive operations platform. Helios bridges executive operational business intelligence (Tableau) with an autonomous, physics-informed ReAct diagnostics copilot (Streamlit + LangChain) over a secure Cloudflare tunnel to eliminate operational silos between asset monitoring and field dispatch.
 
 ---
 
-## Core Operational Metrics & Capabilities
+## Architecture Overview
+                                   +----------------------------------------+
+                                   |         OPERATIONAL TWIN               |
+                                   |    Tableau Executive Dashboard         |
+                                   |   (Weather-Normalized PR, Matrix)      |
+                                   +-------------------+--------------------+
+                                                       |
+                                           Select Anomaly (INV-04)
+                                         URL Action: ?inverter=INV-04
+                                                       |
+                                                       v
+                                   +-------------------+--------------------+
+                                   |      SECURE ACCESS LAYER               |
+                                   |       Cloudflare HTTPS Tunnel          |
+                                   +-------------------+--------------------+
+                                                       |
+                                                       v
 
-* **Fleet Architecture:** 10 MW Utility Fleet (4x 2.5 MW central inverter blocks: INV-01, INV-02, INV-03, INV-04).
-* **Deep Anomaly Isolation:** PyTorch Deep Autoencoder isolates incipient thermal breakdown with **0.095404 MSE** against the **tau = 0.00074** healthy baseline.
-* **Autonomous Reliability Copilot:** ReAct agent grounded in OEM engineering manuals (DOC-OEM-INV2500-CH08) and PPA contractual tariffs (DOC-PPA-PENALTY-GRID).
-* **Financial Risk Quantification:** Real-time revenue loss calculation ($0.075/kWh base tariff + $0.035/kWh grid deviation penalty = **$343.09** total exposure).
-* **Predictive Asset Horizons:**
-  * 24-hour day-ahead solar yield forecasting calibrated to **0.56% WAPE**.
-  * Real-time thermal drift velocity (dT/dt) projecting time-to-trip before the 85 C hardware shutdown limit.
-* **Episodic CMMS Memory:** Closed-loop maintenance tracking with field technician sign-offs and auditable resolution histories.
-* **Shift Handover Summaries:** One-click executive handover memos summarizing fleet-wide PR, derate drag, and open P1 tickets.
+
++----------------------------------------------------------+----------------------------------------------------------+
+|                                        HELIOS RELIABILITY AGENT RUNTIME                                            |
+|                                                                                                                     |
+|   +-----------------------+     +-------------------------------+     +-----------------------------------------+   |
+|   |   Asset State Store   | --> | Autonomous ReAct Diagnostics  | <-- | Industrial RAG Corpus                   |   |
+|   |  Real-time Telemetry  |     | (Root Cause Analysis Engine)  |     | (OEM Manuals & IEC-61724-1 Standards)   |   |
+|   +-----------------------+     +---------------+---------------+     +-----------------------------------------+   |
+|                                                 |                                                                   |
+|                                                 v                                                                   |
+|                                 +---------------+---------------+                                                   |
+|                                 | Automated CMMS Work-Order Gen |                                                   |
+|                                 | (P1 Ticket & Pre-curtailment) |                                                   |
+|                                 +-------------------------------+                                                   |
++-------------------------------------------------------------------------------------------------------------
+
+
+
+---
+
+## Core Capabilities & Engineering Highlights
+
+* **Tableau Executive Operational Twin:** Dynamic KPI BANs, Fixed LOD expressions, and thermal derating scatter matrices calculating real-time fleet generation, weather-normalized Performance Ratio (PR), and instantaneous PPA shortfall exposure.
+* **Bi-Directional Contextual Handoff:** Seamless operational escalation using Tableau URL Actions passing dynamic asset query strings (`/?inverter=<Inverter Id>`) directly into the inference layer.
+* **Autonomous ReAct Diagnostic Engine:** Multi-turn ReAct reasoning agent that parses live inverter telemetry against OEM thermal thresholds to identify IGBT junction overheating and fan bus subsystem failures.
+* **Industrial RAG Integration:** Grounded diagnostic synthesis referencing manufacturer engineering manuals (`DOC-OEM-INV2500-CH08`) and utility performance standards (`DOC-IEC-61724-1`).
+* **Automated CMMS Dispatch:** Instant generation of structured P1 work orders complete with pre-emptive curtailment setpoints (e.g., 15% thermal derate) to avert catastrophic plant trips.
+
+---
+
+## Validated Diagnostic Use Case (`INV-04`)
+
+| Parameter | Operational Value | Threshold / Target | Status |
+| :--- | :--- | :--- | :--- |
+| **Asset Identifier** | `INV-04` (Inverter 04) | Fleet Asset ID | Target Selected |
+| **Peak Heatsink Temp** | **122.5 °C** | 75.0 °C Nominal (85.0 °C Trip) | **CRITICAL OVERHEAT** |
+| **Daylight Mean PR** | **78.9%** | $\ge 82.0\%$ Baseline | **Degraded** |
+| **Thermal Derate Loss**| **4,381.1 kWh** | 0 kWh Baseline | **Revenue Loss** |
+| **Projected Liability**| **$275.00 / hr** | SLA Limit $0.00 | **Contractual Breach** |
+| **Prescriptive Action**| Clean louvers; replace 24V fan bus fuse; enforce 15% pre-emptive curtailment |
+| **Automated CMMS** | Work Order Generated: `WO-HELIOS-INV-04-20261112040` |
+
+## Repository Structure
+
+```text
+helios-renewables-platform/
+├── README.md                      # Executive architecture & portfolio summary
+├── SOP_OPERATIONAL_TWIN.md        # Standard Operating Procedure for full demo execution
+├── requirements.txt               # Python runtime dependencies
+├── tableau/
+│   └── Helios_10MW_Solar_Fleet_Operational_Twin.twbx  # Packaged Tableau Dashboard
+└── src/
+    ├── config.py                  # Fleet parameters, thresholds, and runtime settings
+    ├── telemetry_generator.py     # Production telemetry simulator
+    └── agent/
+        ├── app.py                 # Streamlit web interface and URL routing
+        └── helios_agent.py        # ReAct agent loop and industrial RAG chain
 
 ---
 ## Artifacts
@@ -30,6 +96,8 @@ Helios is an **Industry 5.0 Agentic Digital Twin** built for continuous 10MW uti
 - **Description:** Complete executive operational dashboard featuring weather-normalized PR tracking, thermal derating scatter matrices, and dynamic URL actions triggering the autonomous Streamlit diagnostics copilot.
 
 ## Quickstart: Running the Live Copilot
+https://fit-los-judges-claimed.trycloudflare.com/?inverter=
+
 
 ```bash
 git clone https://github.com/rajaraogurindapalli-gif/helios-renewables-platform.git
