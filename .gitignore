@@ -4,3 +4,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
+
+# Cloudflare binary & runtime data
+cloudflared-linux-amd64
+data/
+*.log
