@@ -1,15 +1,43 @@
 # Helios Industrial Renewable Energy Platform (Solar PV/BESS)
 
-An enterprise-grade industrial digital twin, real-time telemetry processing engine, and predictive MLOps platform built on Google Cloud Platform (GCP) and BigQuery.
+An enterprise-grade industrial digital twin, real-time telemetry processing engine, and predictive MLOps platform built on Google Cloud Platform (GCP), BigQuery, and Tableau.
 
-## System Architecture
-- **Edge Simulator:** Diurnal solar irradiance modeling, IEC 61724-1 temperature-corrected Performance Ratio (PR), and IGBT thermal fault injection.
-- **Ingestion Pipeline:** Colab Edge Simulator -> GCP Pub/Sub (`solar-telemetry-topic`) -> Direct BigQuery Streaming Subscription.
-- **Medallion Lakehouse (BigQuery):**
-  - **Bronze:** `helios_bronze_dev.telemetry_raw` (Partitioned by Date, Clustered by Inverter).
-  - **Silver:** `helios_silver_dev.inverter_cleaned` (Deduplication, Nighttime zero-suppression, IEC 61724-1 PR, Inverter Efficiency).
-  - **Gold:** `helios_gold_dev.fact_inverter_telemetry_hourly` (Kimball Star Schema with conformed `dim_plant` and `dim_inverter`).
-- **MLOps & Predictive Analytics (Phase 3 Completed):**
-  - **Unsupervised Anomaly Detection:** PyTorch Deep Autoencoder trained on healthy inverter baselines. Statistical dynamic threshold $\tau = \mu + 3\sigma = 0.00074$. Isolated `INV-03` thermal derating (`ERR-IGBT-OVERTEMP`) with 100% precision.
-  - **Day-Ahead Generation Forecaster:** Cyclical time + weather GBDT model achieving **0.56% WAPE** and **9.22 kW RMSE** against grid deviation limits.
-  - **Serving Layer:** BigQuery Gold View `fact_yield_predictions`.
+## Live Executive Dashboard
+- **Tableau Public Interactive View:** [Helios Solar Fleet Executive Twin](https://public.tableau.com/app/profile/raja.rao.gurindapalli2544/viz/Helios10MWSolarFleet-OperationalDigitalTwin/Dashboard?publish=yes)
+
+---
+
+## Architecture Overview
+
+```text
+[IoT Edge Simulator (Colab)] 
+          │  (JSON Telemetry: 15-min intervals, Diurnal Physics, IGBT Faults)
+          ▼
+[GCP Pub/Sub (solar-telemetry-topic)]
+          │  (Direct Streaming Ingestion)
+          ▼
+[BigQuery Bronze Lakehouse (helios_bronze_dev.telemetry_raw)]
+          │  (Partitioned by Timestamp, Clustered by Inverter)
+          ▼
+[BigQuery Silver Layer (helios_silver_dev.inverter_cleaned)]
+          │  (Deduplication, Nighttime Zero-Suppression, IEC 61724-1 PR Correction)
+          ├─────────────────────────────────────────┐
+          ▼                                         ▼
+[MLOps Serving Engine]                     [Kimball Star Schema Gold]
+  • PyTorch Deep Autoencoder                  • dim_plant
+    (MSE threshold tau = 0.00074; 100% isolation) • dim_inverter
+  • Day-Ahead GBDT Yield Forecaster           • fact_inverter_telemetry_hourly
+    (0.56% WAPE; 9.22 kW RMSE)                • fact_yield_predictions
+          │                                         │
+          └────────────────────┬────────────────────┘
+                               ▼
+            [Tableau Public Executive Twin]
+            (Real-Time PR Tracking, Thermal Anomaly Radar, Generation BANs)
+```
+
+## System Highlights & Performance
+* **Streaming Architecture:** Direct Pub/Sub to BigQuery ingestion supporting sub-second row arrival.
+* **Standards Compliance:** Full implementation of **IEC 61724-1** temperature-corrected Performance Ratio (PR) at the Silver lakehouse layer.
+* **Unsupervised Fault Isolation:** PyTorch Deep Autoencoder isolates IGBT overheating (`ERR-IGBT-OVERTEMP`) on derated inverters (`INV-03`) with a reconstruction loss ratio of over 1,200x against healthy baseline units.
+* **Yield Forecasting:** Day-ahead GBDT model achieving **0.56% WAPE** against strict 10% grid code deviation limits.
+* **Business Intelligence:** Kimball Gold star schema serving executive KPIs, inverter PR benchmarking, and thermal risk quadrants.
