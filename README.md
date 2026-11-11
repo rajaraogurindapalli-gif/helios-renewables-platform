@@ -24,6 +24,10 @@ Helios is an **Industry 5.0 Agentic Digital Twin** built for continuous 10MW uti
 * **Shift Handover Summaries:** One-click executive handover memos summarizing fleet-wide PR, derate drag, and open P1 tickets.
 
 ---
+## Artifacts
+### Tableau Operational Twin
+- **File:** `tableau/Helios_10MW_Solar_Fleet_Operational_Twin.twbx`
+- **Description:** Complete executive operational dashboard featuring weather-normalized PR tracking, thermal derating scatter matrices, and dynamic URL actions triggering the autonomous Streamlit diagnostics copilot.
 
 ## Quickstart: Running the Live Copilot
 
