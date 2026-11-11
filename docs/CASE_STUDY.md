@@ -135,3 +135,19 @@ Helios was designed to bridge the operational gap between field engineering tele
 Helios integrates an **Autonomous Plant Reliability Agent** that combines ReAct (Reasoning + Acting) decision loops with an industrial **Retrieval-Augmented Generation (RAG)** knowledge base to close the loop between data detection and operational remediation.
 
 ### Architecture & Operational Flow
+
+---
+
+## 9. Industry 5.0 Enhancements: Predictive Horizons & Closed-Loop CMMS
+
+### 9.1 Predictive Runaway Horizon Modeling
+To prevent unplanned midday thermal trips, the platform integrates real-time thermal drift velocity tracking: dT/dt = polyfit(T_recent, 1). When dT/dt > 1.5 C/hr during high-irradiance ramps, the system estimates the time window before reaching the 85 C hardware trip threshold.
+
+### 9.2 Closed-Loop CMMS & Asset Memory
+Incident lifecycle tracking is preserved via AssetMemoryStore:
+1. Detection & Triage: Autoencoder triggers P1 Work Order with OEM RAG citations.
+2. Persistence: Work order stored with exposure cost ($343.09) and root-cause breakdown.
+3. Technician Sign-Off: Field personnel record resolution notes and mark tickets resolved, closing the regulatory compliance loop.
+
+### 9.3 24-Hour Day-Ahead Solar Yield & PPA Grid Commitment
+The predictor models next-day generation across all 4 central blocks, comparing forecast generation against PPA day-ahead injection schedules to alert operators of potential grid deviation penalties before the operating day begins.

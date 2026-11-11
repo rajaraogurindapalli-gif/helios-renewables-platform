@@ -1,49 +1,35 @@
-# Helios Industrial Renewable Energy Platform (Solar PV/BESS)
+# Helios: 10MW Solar Fleet Autonomous Reliability & Digital Twin Platform
 
-An enterprise-grade industrial digital twin, real-time telemetry processing engine, and predictive MLOps platform built on Google Cloud Platform (GCP), BigQuery, and Tableau.
+[![CI/CD Pipeline](https://github.com/rajaraogurindapalli-gif/helios-renewables-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/rajaraogurindapalli-gif/helios-renewables-platform/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python: 3.10+](https://img.shields.io/badge/Python-3.10%2B-brightgreen.svg)](https://python.org)
+[![PyTorch: Deep Autoencoder](https://img.shields.io/badge/PyTorch-Autoencoder-EE4C2C.svg)](https://pytorch.org)
+[![Tableau: Production Bound](https://img.shields.io/badge/Tableau-Operational%20Twin-E97627.svg)](https://public.tableau.com)
+[![Streamlit: Reliability Copilot](https://img.shields.io/badge/Streamlit-Copilot%20UI-FF4B4B.svg)](src/agent/app.py)
 
-# Helios Industrial Renewable Energy Platform (Solar PV/BESS)
-
-[![Helios CI & Container Validation](https://github.com/rajaraogurindapalli-gif/helios-renewables-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/rajaraogurindapalli-gif/helios-renewables-platform/actions/workflows/ci.yml)
-
-An enterprise-grade industrial digital twin, real-time telemetry processing engine, and predictive MLOps platform built on Google Cloud Platform (GCP), BigQuery, and Tableau.
-
-## Live Executive Dashboard
-- **Tableau Public Interactive View:** [Helios Solar Fleet Executive Twin](https://public.tableau.com/app/profile/raja.rao.gurindapalli2544/viz/Helios10MWSolarFleet-OperationalDigitalTwin/Dashboard?publish=yes)
+Helios is an **Industry 5.0 Agentic Digital Twin** built for continuous 10MW utility-scale photovoltaic fleets (4x 2.5MW central inverters). It replaces static telemetry thresholds with a closed-loop reliability pipeline: **Physics Engine -> BigQuery Medallion Lakehouse -> PyTorch Autoencoder -> Autonomous ReAct & Industrial RAG Agent -> Predictive Horizons & CMMS Memory**.
 
 ---
 
-## Architecture Overview
+## Core Operational Metrics & Capabilities
 
-```text
-[IoT Edge Simulator (Colab)] 
-          │  (JSON Telemetry: 15-min intervals, Diurnal Physics, IGBT Faults)
-          ▼
-[GCP Pub/Sub (solar-telemetry-topic)]
-          │  (Direct Streaming Ingestion)
-          ▼
-[BigQuery Bronze Lakehouse (helios_bronze_dev.telemetry_raw)]
-          │  (Partitioned by Timestamp, Clustered by Inverter)
-          ▼
-[BigQuery Silver Layer (helios_silver_dev.inverter_cleaned)]
-          │  (Deduplication, Nighttime Zero-Suppression, IEC 61724-1 PR Correction)
-          ├─────────────────────────────────────────┐
-          ▼                                         ▼
-[MLOps Serving Engine]                     [Kimball Star Schema Gold]
-  • PyTorch Deep Autoencoder                  • dim_plant
-    (MSE threshold tau = 0.00074; 100% isolation) • dim_inverter
-  • Day-Ahead GBDT Yield Forecaster           • fact_inverter_telemetry_hourly
-    (0.56% WAPE; 9.22 kW RMSE)                • fact_yield_predictions
-          │                                         │
-          └────────────────────┬────────────────────┘
-                               ▼
-            [Tableau Public Executive Twin]
-            (Real-Time PR Tracking, Thermal Anomaly Radar, Generation BANs)
+* **Fleet Architecture:** 10 MW Utility Fleet (4x 2.5 MW central inverter blocks: INV-01, INV-02, INV-03, INV-04).
+* **Deep Anomaly Isolation:** PyTorch Deep Autoencoder isolates incipient thermal breakdown with **0.095404 MSE** against the **tau = 0.00074** healthy baseline.
+* **Autonomous Reliability Copilot:** ReAct agent grounded in OEM engineering manuals (DOC-OEM-INV2500-CH08) and PPA contractual tariffs (DOC-PPA-PENALTY-GRID).
+* **Financial Risk Quantification:** Real-time revenue loss calculation ($0.075/kWh base tariff + $0.035/kWh grid deviation penalty = **$343.09** total exposure).
+* **Predictive Asset Horizons:**
+  * 24-hour day-ahead solar yield forecasting calibrated to **0.56% WAPE**.
+  * Real-time thermal drift velocity (dT/dt) projecting time-to-trip before the 85 C hardware shutdown limit.
+* **Episodic CMMS Memory:** Closed-loop maintenance tracking with field technician sign-offs and auditable resolution histories.
+* **Shift Handover Summaries:** One-click executive handover memos summarizing fleet-wide PR, derate drag, and open P1 tickets.
+
+---
+
+## Quickstart: Running the Live Copilot
+
+```bash
+git clone https://github.com/rajaraogurindapalli-gif/helios-renewables-platform.git
+cd helios-renewables-platform
+pip install -r requirements.txt
+streamlit run src/agent/app.py
 ```
-
-## System Highlights & Performance
-* **Streaming Architecture:** Direct Pub/Sub to BigQuery ingestion supporting sub-second row arrival.
-* **Standards Compliance:** Full implementation of **IEC 61724-1** temperature-corrected Performance Ratio (PR) at the Silver lakehouse layer.
-* **Unsupervised Fault Isolation:** PyTorch Deep Autoencoder isolates IGBT overheating (`ERR-IGBT-OVERTEMP`) on derated inverters (`INV-03`) with a reconstruction loss ratio of over 1,200x against healthy baseline units.
-* **Yield Forecasting:** Day-ahead GBDT model achieving **0.56% WAPE** against strict 10% grid code deviation limits.
-* **Business Intelligence:** Kimball Gold star schema serving executive KPIs, inverter PR benchmarking, and thermal risk quadrants.
