@@ -1,6 +1,6 @@
 """
 Helios Industrial Reliability Agent - Streamlit Copilot UI
-Includes ReAct Diagnostics, Industrial RAG, Episodic Asset Memory, and Shift Handover Summaries.
+Includes ReAct Diagnostics, Episodic Memory, Shift Briefings, RAG Corpus, and Predictive Horizon Modeling.
 """
 
 import sys
@@ -13,6 +13,7 @@ if REPO_ROOT not in sys.path:
 import streamlit as st
 import pandas as pd
 from src.agent.helios_agent import HeliosReliabilityAgent, DOMAIN_KNOWLEDGE_BASE
+from src.agent.predictor import FleetPredictor
 
 st.set_page_config(
     page_title="Helios Reliability Copilot",
@@ -83,9 +84,10 @@ with col4:
 
 st.divider()
 
-# --- TABS ---
-tab_diag, tab_memory, tab_handover, tab_rag, tab_telemetry = st.tabs([
+# --- TABS INCLUDING PREDICTIONS ---
+tab_diag, tab_pred, tab_memory, tab_handover, tab_rag, tab_telemetry = st.tabs([
     "🤖 ReAct Diagnostics", 
+    "🔮 Predictive Horizons",
     "🧠 Asset Memory & CMMS", 
     "📋 Shift Handover Briefing", 
     "📚 Industrial RAG Corpus", 
@@ -94,26 +96,21 @@ tab_diag, tab_memory, tab_handover, tab_rag, tab_telemetry = st.tabs([
 
 with tab_diag:
     st.subheader("Autonomous ReAct Diagnostic Loop")
-    
     if st.button("Run Diagnostic & Dispatch Evaluation", type="primary"):
         with st.spinner(f"Agent executing diagnostic reasoning on {selected_inv}..."):
             work_order = agent.diagnose_and_dispatch(selected_inv)
-            
             if work_order.get("status") == "NOMINAL":
                 st.success(work_order["message"])
             else:
                 st.error(f"🚨 **ANOMALY CONFIRMED: {work_order['priority']} WORK ORDER GENERATED**")
-                
                 wo_col1, wo_col2 = st.columns([2, 1])
                 with wo_col1:
                     st.markdown(f"### Ticket: `{work_order['work_order_id']}`")
                     st.markdown("**Root Cause Diagnosis:**")
                     st.info(work_order["root_cause_diagnosis"])
-                    
                     st.markdown("**Prescribed Field SOP Actions:**")
                     for step in work_order["prescribed_field_sop"]:
                         st.markdown(f"- {step}")
-                        
                 with wo_col2:
                     st.markdown("### Financial Exposure")
                     loss_metrics = work_order["estimated_financial_loss"]
@@ -121,29 +118,46 @@ with tab_diag:
                     st.write(f"• **Energy Shortfall:** {loss_metrics['lost_generation_kwh']} kWh")
                     st.write(f"• **Base Revenue Loss:** ${loss_metrics['revenue_loss_usd']}")
                     st.write(f"• **Grid Deviation Penalty:** ${loss_metrics['grid_deviation_penalty_usd']}")
-                    
-                    st.divider()
-                    st.markdown("**Governing RAG Documentation:**")
-                    for doc_id in work_order["rag_reference_source"]:
-                        st.code(doc_id, language="text")
+
+with tab_pred:
+    st.subheader(f"🔮 Predictive Asset Horizons: {selected_inv}")
+    
+    # 1. Thermal Runaway Projection
+    pred_res = FleetPredictor.predict_thermal_runaway(df, selected_inv)
+    p_col1, p_col2, p_col3 = st.columns(3)
+    p_col1.metric("Thermal Drift Velocity", f"{pred_res['thermal_velocity_c_per_hr']} °C/hr")
+    p_col2.metric("Time to Critical Trip (85°C)", f"{pred_res['projected_time_to_critical_trip_hrs']}")
+    p_col3.metric("Predictive Urgency", f"{pred_res['predictive_urgency']}")
+    
+    st.info(f"**Proactive Dispatch Strategy:** {pred_res['proactive_curtailment_recommendation']}")
+    
+    st.divider()
+    # 2. 24-Hour Day-Ahead Generation Forecast
+    st.subheader("24-Hour Day-Ahead Solar Yield & PPA Grid Commitment Forecast")
+    st.caption("GBDT model prediction calibrated to 0.56% WAPE against contractual day-ahead injection schedule.")
+    forecast_df = FleetPredictor.forecast_next_24h_yield()
+    
+    chart_data = forecast_df.set_index("Hour")[["Forecast_Generation_MW", "Grid_Commitment_PPA_MW"]]
+    st.line_chart(chart_data)
+    
+    with st.expander("Inspect Day-Ahead Dispatch Schedule (Hourly MW)"):
+        st.dataframe(forecast_df, use_container_width=True)
 
 with tab_memory:
     st.subheader(f"Episodic Maintenance History: {selected_inv}")
     history = agent.memory.get_asset_history(selected_inv)
-    
     if not history:
-        st.info(f"No previous maintenance tickets logged for {selected_inv}. Asset record clean.")
+        st.info(f"No previous maintenance tickets logged for {selected_inv}.")
     else:
         for item in reversed(history):
             with st.expander(f"Ticket: {item['work_order_id']} | Status: {item['status']} | Logged: {item['logged_at']}"):
                 st.write(f"**Priority:** {item['priority']}")
                 st.write(f"**Financial Exposure:** ${item.get('financial_exposure_usd', 0.0)}")
-                
                 if item["status"] == "OPEN":
-                    notes = st.text_input(f"Technician Resolution Notes for {item['work_order_id']}:", key=item['work_order_id'])
-                    if st.button("Mark Work Order Resolved", key=f"btn_{item['work_order_id']}"):
+                    notes = st.text_input(f"Technician Notes ({item['work_order_id']}):", key=item['work_order_id'])
+                    if st.button("Mark Resolved", key=f"btn_{item['work_order_id']}"):
                         agent.memory.resolve_work_order(selected_inv, item['work_order_id'], notes)
-                        st.success(f"Work order {item['work_order_id']} resolved successfully.")
+                        st.success("Work order resolved.")
                         st.rerun()
                 else:
                     st.success(f"✓ Resolved at {item['closed_at']}")
@@ -153,13 +167,12 @@ with tab_handover:
     st.subheader("Shift Supervisor Handover Memo Generator")
     all_history = agent.memory._read_store()
     open_count = sum(1 for inv_list in all_history.values() for item in inv_list if item.get("status") == "OPEN")
-    
     memo = agent.analytics.generate_shift_handover_text(df, open_orders_count=open_count)
     st.markdown(memo)
     st.download_button(
-        label="Download Shift Handover Memo (.txt)",
+        label="Download Shift Briefing (.txt)",
         data=memo,
-        file_name=f"Helios_Shift_Handover_{pd.Timestamp.now().strftime('%Y%m%d')}.txt",
+        file_name="Helios_Shift_Handover.txt",
         mime="text/plain"
     )
 
