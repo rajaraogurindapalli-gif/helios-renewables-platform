@@ -81,3 +81,9 @@ The Gold Kimball star schema connects directly to Tableau Public 2026.2 to monit
 3. **Thermal Derating Matrix:** Multi-quadrant scatter chart correlating heatsink temperatures against power output, bounded by a 65°C critical alarm threshold.
 
 **Live Interactive Dashboard:** [Tableau Public Executive Twin](https://public.tableau.com/app/profile/raja.rao.gurindapalli2544/viz/Helios10MWSolarFleet-OperationalDigitalTwin/Dashboard?publish=yes)
+
+---
+
+## 7. Enterprise SDLC & Dev-Test-Prod Environment Topology
+
+To replicate industrial-grade mission-critical deployments, Helios isolates operational risks via a 3-tier promotion lifecycle, segregating state, streaming channels, and compute permissions across development, automated testing, and production.
