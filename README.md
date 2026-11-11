@@ -2,6 +2,12 @@
 
 An enterprise-grade industrial digital twin, real-time telemetry processing engine, and predictive MLOps platform built on Google Cloud Platform (GCP), BigQuery, and Tableau.
 
+# Helios Industrial Renewable Energy Platform (Solar PV/BESS)
+
+[![Helios CI & Container Validation](https://github.com/rajaraogurindapalli-gif/helios-renewables-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/rajaraogurindapalli-gif/helios-renewables-platform/actions/workflows/ci.yml)
+
+An enterprise-grade industrial digital twin, real-time telemetry processing engine, and predictive MLOps platform built on Google Cloud Platform (GCP), BigQuery, and Tableau.
+
 ## Live Executive Dashboard
 - **Tableau Public Interactive View:** [Helios Solar Fleet Executive Twin](https://public.tableau.com/app/profile/raja.rao.gurindapalli2544/viz/Helios10MWSolarFleet-OperationalDigitalTwin/Dashboard?publish=yes)
 
