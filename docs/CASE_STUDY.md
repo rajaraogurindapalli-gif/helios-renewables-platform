@@ -95,3 +95,35 @@ To replicate industrial-grade mission-critical deployments, Helios isolates oper
 Helios adheres to the **TOGAF Standard (The Open Group Architecture Framework)**, structured across the four core architecture domains of the Architecture Development Method (ADM): Business, Data, Application, and Technology (BDAT).
 
 ### BDAT Architecture Decomposition
+
+---
+
+## 9. Key Business Questions Answered by the Platform
+
+Helios was designed to bridge the operational gap between field engineering telemetry and executive asset management. The platform directly resolves five critical business questions:
+
+### 1. Are We Meeting Contractual Performance Ratio (PR) Guarantees Under Dynamic Weather?
+* **Business Impact:** Power Purchase Agreements (PPAs) impose severe financial penalties if plant PR drops below contracted thresholds (typically 75–80%).
+* **Engineering Resolution:** The platform isolates meteorological variability from mechanical inefficiency by applying IEC 61724-1 Class A temperature correction ($\gamma = -0.004/\text{°C}$) to real-time irradiance feeds.
+* **Platform Answer:** The Tableau **Inverter PR Benchmark** visualizes actual vs. temperature-normalized PR across all four 2.5 MW central blocks, instantly flagging underperforming assets.
+
+### 2. Can We Preempt Inverter Catastrophic Failure Before an Unscheduled Breaker Trip?
+* **Business Impact:** Replacing a blown Insulated Gate Bipolar Transistor (IGBT) module costs upwards of $35,000 per incident, alongside lost feed-in revenue and emergency technician overtime.
+* **Engineering Resolution:** The unsupervised PyTorch Deep Autoencoder continuously scores reconstructed multi-sensor operating vectors. Incipient thermal choking triggers an anomaly score spike ($\tau > 0.00074$) 2 to 4 hours before hardware thermal limits trip the main contactor.
+* **Platform Answer:** The **IGBT Thermal Derating Matrix** highlights inverters operating in high-risk thermal quadrants ($>78\text{°C}$ heatsink temperature) under `ERR-IGBT-OVERTEMP`.
+
+### 3. How Much Revenue Is Lost to Ambient Thermal Choking vs. Physical Soiling/Degradation?
+* **Business Impact:** Solar farm operators frequently dispatch costly panel-washing crews when the true root cause of reduced generation is ambient summer heat derating.
+* **Engineering Resolution:** The Gold medallion layer computes `temp_derate_loss_kw` explicitly:
+  $$\Delta P_{\text{derate}} = P_{\text{expected, STC}} \times \gamma \times \max(0, T_{\text{module}} - 25\text{°C})$$
+* **Platform Answer:** Executive KPI BANs quantify lost kilowatt-hours specifically attributable to thermal penalties versus unclassified baseline losses.
+
+### 4. Will Fleet Generation Comply with Day-Ahead Grid Injection Commitments?
+* **Business Impact:** Independent System Operators (ISOs/RTOs) penalize grid injection deviations exceeding $\pm 10\%$ of scheduled day-ahead forecasts.
+* **Engineering Resolution:** The GBDT/LightGBM yield forecaster models diurnal solar elevation and next-day irradiance forecasts to achieve a 0.56% Weighted Absolute Percentage Error (WAPE), well within the 10% penalty band.
+* **Platform Answer:** Operators monitor forecast confidence bands against actual injection schedules to bid accurately in intraday power markets.
+
+### 5. Is Operational Telemetry Strictly Governed and Production-Isolated Across the Lifecycle?
+* **Business Impact:** Mixing testing data with operational reporting distorts billing reconciliations and violates compliance audit standards (such as NERC CIP and SOC 2).
+* **Engineering Resolution:** A 3-tier promotion lifecycle (`dev` $\rightarrow$ `test` $\rightarrow$ `prod`) isolates BigQuery datasets (`helios_gold_prod`), decouples streaming topics, and runs automated CI/CD gating tests on every pull request.
+* **Platform Answer:** Tableau's operational data model binds directly to conformed production mart extracts, ensuring leadership views verified production metrics.
