@@ -127,3 +127,11 @@ Helios was designed to bridge the operational gap between field engineering tele
 * **Business Impact:** Mixing testing data with operational reporting distorts billing reconciliations and violates compliance audit standards (such as NERC CIP and SOC 2).
 * **Engineering Resolution:** A 3-tier promotion lifecycle (`dev` $\rightarrow$ `test` $\rightarrow$ `prod`) isolates BigQuery datasets (`helios_gold_prod`), decouples streaming topics, and runs automated CI/CD gating tests on every pull request.
 * **Platform Answer:** Tableau's operational data model binds directly to conformed production mart extracts, ensuring leadership views verified production metrics.
+
+---
+
+## 10. Industry 5.0 Agentic Twin: Autonomous Reliability Agent & RAG
+
+Helios integrates an **Autonomous Plant Reliability Agent** that combines ReAct (Reasoning + Acting) decision loops with an industrial **Retrieval-Augmented Generation (RAG)** knowledge base to close the loop between data detection and operational remediation.
+
+### Architecture & Operational Flow
