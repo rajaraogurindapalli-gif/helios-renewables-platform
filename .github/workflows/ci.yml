@@ -1,14 +1,18 @@
-name: Helios CI & Container Validation
+name: Helios Multi-Stage CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dev ]
   pull_request:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  test-and-validate:
+    name: 🧪 Stage 1 - Unit & Physics Regression Tests
     runs-on: ubuntu-latest
+    env:
+      APP_ENV: test
+      GCP_PROJECT: responsive-sun-313908
 
     steps:
     - name: Checkout Source Code
@@ -19,22 +23,43 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Validate Dependencies & Syntax
+    - name: Install Runtime & Test Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt pytest
+
+    - name: Syntax Compilation Check
+      run: |
+        python -m py_compile src/config.py
         python -m py_compile src/telemetry_generator.py
         python -m py_compile src/autoencoder_eval.py
         python -m py_compile src/yield_forecaster.py
 
-    - name: Run Domain Physics & ML Unit Tests
+    - name: Execute IEC 61724-1 & Model Unit Tests
       run: |
         PYTHONPATH=. pytest tests/ -v
 
-    - name: Build Docker Container
+    - name: Build Test Docker Image
       run: |
-        docker build -t helios-telemetry-engine:latest .
+        docker build -t helios-telemetry-engine:test .
 
-    - name: Verify Container Execution
+  promote-production:
+    name: 🚀 Stage 2 - Production Container Verification
+    needs: test-and-validate
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: prod
+      GCP_PROJECT: responsive-sun-313908
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    - name: Build Production Container Image
       run: |
-        docker run --rm helios-telemetry-engine:latest python -c 'import torch, sklearn, pandas; print("Container Environment Verified: PyTorch", torch.__version__)'
+        docker build -t helios-telemetry-engine:production .
+
+    - name: Verify Production Container Entrypoint
+      run: |
+        docker run --rm -e APP_ENV=prod helios-telemetry-engine:production python -c "from src.config import settings; print('Production Container Ready: Ingestion Target ->', settings.GOLD_DATASET)"
